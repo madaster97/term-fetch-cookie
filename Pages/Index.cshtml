@@ -23,23 +23,23 @@
         }
         function serverHandlerUnload() {
             // We don't currently support this method, but for reference
-            //navigator.sendBeacon('/clear-cookie');
-            fetch(new Request("/clear-cookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
+            //navigator.sendBeacon('/ClearCookie');
+            fetch(new Request("/ClearCookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
         }
         function serverHandlePageHide(event) {
             if (event.persisted) {
                 /* the page isn't being discarded, so it can be reused later */
             } else {
                 // We don't currently support this method, but for reference
-                //navigator.sendBeacon('/clear-cookie');
-                fetch(new Request("/clear-cookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
+                //navigator.sendBeacon('/ClearCookie');
+                fetch(new Request("/ClearCookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
             }
         }
         function serverHandlerVisibilityChange() {
             if (document.visibilityState === "hidden") {
                 // We don't currently support this method, but for reference
-                //navigator.sendBeacon('/clear-cookie');
-                fetch(new Request("/clear-cookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
+                //navigator.sendBeacon('/ClearCookie');
+                fetch(new Request("/ClearCookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
             }
         }
         function clientHandlerUnload() {
