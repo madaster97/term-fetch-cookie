@@ -1,0 +1,154 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<script>
+            // How we set the cookie initially
+        function initCookieClient() {
+            document.cookie = "myCookie=hello"
+            showCookieClient();
+        }
+        // Just refresh the current cookie from the client-side
+        function showCookieClient() {
+            // Fetch and display the cookie value
+            const cookieValueElement = document.getElementById('cookieValue');
+            const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
+                const [name, value] = cookie.split('=');
+                acc[name] = value;
+                return acc;
+            }, {});
+            cookieValueElement.innerText = (cookies['myCookie'] ? cookies['myCookie'] : 'No cookie found') + ' (as of ' + (new Date()).toLocaleTimeString() + ')';
+        }
+        function serverHandlerUnload() {
+            // We don't currently support this method, but for reference
+            //navigator.sendBeacon('/clear-cookie');
+            fetch(new Request("/clear-cookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
+        }
+        function serverHandlePageHide(event) {
+            if (event.persisted) {
+                /* the page isn't being discarded, so it can be reused later */
+            } else {
+                // We don't currently support this method, but for reference
+                //navigator.sendBeacon('/clear-cookie');
+                fetch(new Request("/clear-cookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
+            }
+        }
+        function serverHandlerVisibilityChange() {
+            if (document.visibilityState === "hidden") {
+                // We don't currently support this method, but for reference
+                //navigator.sendBeacon('/clear-cookie');
+                fetch(new Request("/clear-cookie", { method: "POST", keepalive: !0, mode: "same-origin", credentials: "same-origin" }));
+            }
+        }
+        function clientHandlerUnload() {
+            document.cookie = 'myCookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+
+        function clientHandlerPageHide(event) {
+            if (event.persisted) {
+                /* the page isn't being discarded, so it can be reused later */
+            } else {
+                document.cookie = 'myCookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            }
+        }
+        function clientHandlerVisibilityChange() {
+            if (document.visibilityState === "hidden") {
+                document.cookie = 'myCookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            }
+        }
+
+        var lastInputHandler = "NONE" // Default checked value (and we don't register a handler initially)
+        var lastInputEvent = "unload" // Default to using unload (other options: pagehide, visibilitychange)
+
+        function getHandler(inputEvent, inputHandler) {
+            switch (inputHandler) {
+                case "SERVER":
+                    if (inputEvent == "unload") {
+                        return serverHandlerUnload
+                    } else if (inputEvent == "pagehide") {
+                        return serverHandlePageHide
+                    } else if (inputEvent == "visibilitychange") {
+                        return serverHandlerVisibilityChange
+                    } else {
+                        break;
+                    }
+                case "CLIENT":
+                    if (inputEvent == "unload") {
+                        return clientHandlerUnload
+                    } else if (inputEvent == "pagehide") {
+                        return clientHandlerPageHide
+                    } else if (inputEvent == "visibilitychange") {
+                        return clientHandlerVisibilityChange
+                    } else {
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
+        /**
+         * Values are unload, pagehide and visibilitychange
+         * 1. Remove the listener for the last event/handler pair (unless handler is NONE)
+         * 2. Add the listener for the new event/handler pair (unless handler is NONE)
+         * 3. Set the current event as te last value
+        */
+        function setEvent(eventValue) {
+            if (lastInputHandler != "NONE") {
+                removeEventListener(lastInputEvent, getHandler(lastInputEvent, lastInputHandler))
+                addEventListener(eventValue, getHandler(eventValue, lastInputHandler))
+            }
+            lastInputEvent = eventValue;
+        }
+
+        /**
+         * Values are NONE, SERVER and CLIENT
+         * 1. Remove the listener for the last handler (unless it was NONE)
+         * 2. Add the listener for the new handler (unless it is NONE)
+         * 3. Set the current handler as the last handler
+        */
+        function setHandler(handlerValue) {
+            if (lastInputHandler != "NONE") {
+                removeEventListener("unload", getHandler(lastInputEvent, lastInputHandler))
+            }
+
+            if (handlerValue != "NONE") {
+                addEventListener("unload", getHandler(lastInputEvent, handlerValue))
+            }
+            lastInputHandler = handlerValue;
+        }
+</script>
+
+<h1>Cookie Example</h1>
+<h2>Server Cookie</h2>
+<p id="serverCookie">@Model.CookieValue</p>
+<h2>Client Cookie</h2>
+<p id="cookieValue">Loading cookie value...</p>
+
+<label for="event">Select the event to fire on:</label>
+<select id="eventSelector" oninput="setEvent(this.value)">
+    <option value="unload">unload</option>
+    <option value="pagehide">pagehide (when not persisted)</option>
+    <option value="visibilitychange">visibilitychange (when transitioning to hidden)</option>
+</select>
+
+<p>Select the type of handler to use:</p>
+<input oninput="setHandler(this.value)" type="radio" id="server" name="fav_language" value="SERVER">
+<label for="html">SERVER</label><br>
+<input oninput="setHandler(this.value)" type="radio" id="client" name="fav_language" value="CLIENT">
+<label for="client">CLIENT</label><br>
+<input oninput="setHandler(this.value)" type="radio" id="none" name="fav_language" value="NONE" checked="checked">
+<label for="none">NONE</label>
+<br />
+
+<button type="button" onclick="initCookieClient()">Set cookie by client (refresh to check server cookie)</button>
+<button type="button" onclick="showCookieClient()">Re-check cookie in client-side</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show the current client cookie on load
+        showCookieClient();
+    });
+</script>
