@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CookieReaderApp.Pages
 {
+    // TODO - Add back anti-CSRF, add to JS too
+    // https://www.learnrazorpages.com/security/request-verification
+    [IgnoreAntiforgeryToken(Order = 1001)]
     public class ClearCookieModel : PageModel
     {
         public IActionResult OnPost()
