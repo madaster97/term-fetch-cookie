@@ -7,7 +7,8 @@
 <script>
             // How we set the cookie initially
         function initCookieClient() {
-            document.cookie = "myCookie=hello"
+            @* Expire cookie tomorrow (1 day in ms) *@
+            document.cookie = "myCookie=hello; expires=" + new Date((new Date()).getTime() + 1000 * 60 * 60 * 24).toUTCString();
             showCookieClient();
         }
         // Just refresh the current cookie from the client-side
